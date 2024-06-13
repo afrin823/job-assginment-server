@@ -21,6 +21,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+
+
+
 //-------------------------------
 require("dotenv").config();
 //-----------------------
@@ -34,6 +37,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
 
 //middlewares nejr toire--start
 const logger = async (req, res, next) => {
