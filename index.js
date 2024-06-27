@@ -11,7 +11,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:4000",
-      "https://earthwish-c17dd.web.app",
+      "https://job-assignment-11.web.app",
       "http://localhost:5173",
     ],
     credentials: true,
