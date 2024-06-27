@@ -12,6 +12,7 @@ app.use(
     origin: [
       "http://localhost:4000",
       "https://job-assignment-11.web.app",
+      "https://afrin-assignment.netlify.app",
       "http://localhost:5173",
     ],
     credentials: true,
