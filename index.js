@@ -21,8 +21,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vadwj9m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-const uri = `mongodb+srv://${process.env.DB_PENDING}:${process.env.DB_PENDINGPASS}@cluster0.vadwj9m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -63,121 +61,147 @@ async function run() {
       .collection("assignmentCollection");
 
     const bidsCollection = client.db("assignmentDB").collection("bids");
-    console.log(bidsCollection);
 
     app.post("/assignment", async (req, res) => {
-      const newAssignment = req.body;
-      const result = await assignmentCollection.insertOne(newAssignment);
-      res.send(result);
+      try {
+        const newAssignment = req.body;
+        const result = await assignmentCollection.insertOne(newAssignment);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error creating assignment");
+      }
     });
 
-    app.get("/assigment", async (req, res) => {
-        try {
-          const { level } = req.query;
-
-          // console.log("form valid token", req.user);
-          // if (req.query.email !== req?.user.email) {
-          //   return res.status(403).send({ message: "forbidden access" });
-          // }
-          
-          let query = {};
-
-          if (level && level.length > 0) {
-            query = { level: level }; // Assuming 'level' is a field in your MongoDB documents
-          }
-
-          const cursor = await assignmentCollection.find(query);
-          const result = await cursor.toArray();
-
-          res.send(result);
-        } catch (error) {
-          console.error("Error fetching assignments:", error);
-          res.status(500).send("Internal Server Error");
+    app.get("/assignment", async (req, res) => {
+      try {
+        const { level } = req.query;
+        let query = {};
+        if (level && level.length > 0) {
+          query = { level };
         }
+        const cursor = await assignmentCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error fetching assignments");
       }
-    );
+    });
 
     app.put("/assignment/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updated = req.body;
-      const assignment = {
-        $set: {
-          titleName: updated.titleName,
-          description: updated.description,
-          processingTime: updated.processingTime,
-          mark: updated.mark,
-          photo: updated.photo,
-          level: updated.level,
-        },
-      };
-      const result = await assignmentCollection.updateOne(
-        filter,
-        assignment,
-        options
-      );
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const options = { upsert: true };
+        const updated = req.body;
+        const assignment = {
+          $set: {
+            titleName: updated.titleName,
+            description: updated.description,
+            processingTime: updated.processingTime,
+            mark: updated.mark,
+            photo: updated.photo,
+            level: updated.level,
+          },
+        };
+        const result = await assignmentCollection.updateOne(
+          filter,
+          assignment,
+          options
+        );
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error updating assignment");
+      }
     });
 
     app.post("/bids", async (req, res) => {
-      const bids = req.body;
-      const result = await bidsCollection.insertOne(bids);
-      res.send(result);
+      try {
+        const bids = req.body;
+        const result = await bidsCollection.insertOne(bids);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error creating bid");
+      }
     });
 
     app.get("/bids/pending", async (req, res) => {
-      const query = { status: { $eq: "pending" } };
-      const result = await bidsCollection.find(query).toArray();
-      res.send(result);
+      try {
+        const query = { status: "pending" };
+        const result = await bidsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error fetching pending bids");
+      }
     });
 
     app.get("/bids/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await bidsCollection.findOne(query);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await bidsCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error fetching bid");
+      }
     });
 
     app.put("/bids/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updated = req.body;
-      const update = {
-        $set: {
-          givenMark: updated.givenMark,
-          feedBack: updated.feedBack,
-          status: updated.status,
-        },
-      };
-      const result = await bidsCollection.updateOne(query, update, options);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const options = { upsert: true };
+        const updated = req.body;
+        const update = {
+          $set: {
+            givenMark: updated.givenMark,
+            feedBack: updated.feedBack,
+            status: updated.status,
+          },
+        };
+        const result = await bidsCollection.updateOne(query, update, options);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error updating bid");
+      }
     });
 
     app.get("/bid/:email", async (req, res) => {
-      const user = req.params.email;
-      const filter = { examineeEmail: user };
-      const result = await bidsCollection.find(filter).toArray();
-      res.send(result);
+      try {
+        const user = req.params.email;
+        const filter = { examineeEmail: user };
+        const result = await bidsCollection.find(filter).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error fetching user's bids");
+      }
     });
 
-    app.delete("/assigment/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await assignmentCollection.deleteOne(query);
-      res.send(result);
+    app.delete("/assignment/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await assignmentCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error deleting assignment");
+      }
     });
 
-    app.get("/assigmentCount", async (req, res) => {
-      const count = await assignmentCollection.estimatedDocumentCount();
-      res.send({ count });
+    app.get("/assignmentCount", async (req, res) => {
+      try {
+        const count = await assignmentCollection.estimatedDocumentCount();
+        res.send({ count });
+      } catch (error) {
+        res.status(500).send("Error fetching assignment count");
+      }
     });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
+    // Uncomment if you want to close the client connection after server starts
+    // await client.close();
   }
 }
 run().catch(console.dir);
